@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+
+    <script>
+
+        $(document).ready (function() {
+            $("#trackurl").hide();
+        });
+
+        function addInstallment() {
+            var html = '<div class="form-group installmentform" id="installment">' + $("#installment").html() + '</div>';
+            $("#installment-holder").append(html);
+        }
+
+        function removeInstallment(el) {
+            el.closest('div[id]').remove();
+        }
+
+        function initPayment() {
+            var data= {
+
+                'csrfmiddlewaretoken' : $("[name='csrfmiddlewaretoken']").val(),
+                'hostaccount' : $("#hostaccount").val(),
+                'language' : $("#language").val(),
+                'msisdn' : $("#msisdn").val(),
+                'amount' : $("#amount").val(),
+                'language' : $("#language").val(),
+                'currency' : $("#currency").val(),
+                'paymentsecurity' : $("#paymentsecurity").val(),
+                'trackurl' : $("#trackurl").val(),
+                'installments' : []
+            }
+
+            $("[id='installment']").each(function() {
+                var installment = {
+                    'id' : $(this).find("[id='installmentid']").val(),
+                    'paymentMethod' : $(this).find("[id='installpaymentmethod']").val(),
+                    'amount' :  $(this).find("[id='installamount']").val(),
+                    'cardBrand' : $(this).find("[id='installcardBrand']").val(),
+                    'count' : $(this).find("[id='installcount']").val()
+                };
+                data.installments.push(installment);
+            });
+
+            request = $.ajax({
+                url: "/paycellsdkclient/init/",
+                type: "POST",
+                dataType: 'json',
+                data: {    'csrfmiddlewaretoken' : $("[name='csrfmiddlewaretoken']").val(),
+                           'data' :JSON.stringify(data)
+                      },
+                success: function(input) {
+                    console.log(input);
+                    $("#trackurl").prop("href", input.trackingUrl);
+                    $("#trackurl").show();
+                    $("#paymentrefno").val(input.paymentReferenceNumber);
+                },
+            });
+
+        }
+
+
+    </script>
+    <br/>
+    <br/>
+    <form action="paycellsdkclient/init/" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="hostaccount">HostAccount</label>
+            <input name="email" type="email" class="form-control" id="hostaccount" aria-describedby="emailHelp"
+                   placeholder="xxx@xxx.com">
+        </div>
+        <div class="form-group">
+            <label for="language">Language</label>
+            <input name="language" type="text" class="form-control" id="language" placeholder="re">
+        </div>
+        <div class="form-group">
+            <label for="msisdn">Msisdn</label>
+            <input name="msisdn" type="text" class="form-control" id="msisdn" placeholder="905465553333">
+        </div>
+        <div class="form-group">
+            <label for="amount">Amount</label>
+            <input name="amount" type="text" class="form-control" id="amount" placeholder="100">
+        </div>
+        <div class="form-group">
+            <label for="currency">Currency</label>
+            <input name="currency" type="text" class="form-control" id="currency" placeholder="99">
+        </div>
+        <div class="form-group">
+            <label for="paymentsecurity">PaymentSecurity</label>
+            <input name="paymentsecurity" type="text" class="form-control" id="paymentsecurity"
+                   placeholder="NON_THREED_SECURE">
+        </div>
+        <div id="installment-holder">
+            <div class="form-group installmentform" id="installment">
+                <div class="row">
+                    <div class="col-1" style='padding-top:2em'>
+                        <label>Installment: </label>
+                    </div>
+                    <div class="col-1">
+                        <label for="installmentid">ID</label>
+                        <input type="text" class="form-control" id="installmentid" placeholder="">
+                    </div>
+                    <div class="col-2">
+                        <label for="installpaymentmethod">PaymentMethod</label>
+                        <input type="text" class="form-control" id="installpaymentmethod" placeholder="CREDIT_CARD">
+                    </div>
+                    <div class="col-2">
+                        <label for="installamount">Amount</label>
+                        <input type="text" class="form-control" id="installamount" placeholder="100">
+                    </div>
+                    <div class="col-2">
+                        <label for="installcardBrand">CardBrand</label>
+                        <input type="text" class="form-control" id="installcardBrand" placeholder="BONUS">
+                    </div>
+                    <div class="col-2">
+                        <label for="installcount">Count</label>
+                        <input type="text" class="form-control" id="installcount" placeholder="1">
+                    </div>
+                    <div class="col-1">
+                        <button type="button" class="btn btn-primary" style='margin-top:2em'
+                                onclick="addInstallment();">ADD
+                        </button>
+                    </div>
+                    <div class="col-1">
+                        <button type="button" class="btn btn-primary" style='margin-top:2em'
+                                onclick="removeInstallment(this);">DEL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row" id="paymentrefdiv">
+                <div class="col-6">
+                    <label for="paymentrefno">PaymentReferenceNumber</label>
+                    <input name="paymentrefno" type="text" class="form-control" id="paymentrefno" placeholder="" disabled="true">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <a href="#" id="trackurl" target="_blank">Click To Open Payment Page</a>
+        </div>
+        <button type="button" class="btn btn-primary"  onclick="initPayment();">Submit</button>
+    </form>
+</div>
+</body>
+</html>

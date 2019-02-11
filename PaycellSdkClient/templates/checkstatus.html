@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <script>
+        function reversePayment(){
+            request = $.ajax({
+                url: "/paycellsdkclient/reversePayment/",
+                type: "POST",
+                dataType: 'json',
+                data: {    'csrfmiddlewaretoken' : $("[name='csrfmiddlewaretoken']").val(),
+                           'paymentReferenceNumber' : $("p#paymentrefno").text()
+                      },
+                success: function(input) {
+                    location.reload(true);
+                },
+            });
+        }
+
+        function refundPayment(){
+            request = $.ajax({
+                url: "/paycellsdkclient/refundPayment/",
+                type: "POST",
+                dataType: 'json',
+                data: {    'csrfmiddlewaretoken' : $("[name='csrfmiddlewaretoken']").val(),
+                           'paymentReferenceNumber' : $("p#paymentrefno").text(),
+                           'refundAmount' : $("#refundAmount").val()
+                      },
+                success: function(input) {
+                    location.reload(true);
+                },
+            });
+        }
+
+        function togglestatusCodes() {
+            $("li#statusCodes").toggle();
+        }
+
+
+
+    </script>
+    <br/>
+    <br/>
+    <div id="paymentDetails">
+        {% csrf_token %}
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-primary"><b>responseHeader</b> <br/>
+            <li class="list-group-item list-group-item-success" style="padding-left: 4em;"><b>transactionId: </b>
+                {{responseHeader.transactionId}}
+            </li>
+            <li class="list-group-item list-group-item-success" style="padding-left: 4em;"><b>responseDateTime</b>
+                {{responseHeader.responseDateTime}}
+            </li>
+            <li class="list-group-item list-group-item-success" style="padding-left: 4em;"><b>responseCode</b>
+                {{responseHeader.responseCode}}
+            </li>
+            <li class="list-group-item list-group-item-success" style="padding-left: 4em;"><b>responseDescription</b>
+                {{responseHeader.responseDescription}}
+            </li>
+            <li class="list-group-item"><b>extraParameters</b> {{extraParameters}}</li>
+            <li class="list-group-item"><b>acquirerbankCode</b> {{acquirerbankCode}}</li>
+            <li class="list-group-item"><b>msisdn</b> {{msisdn}}</li>
+            <li class="list-group-item"><b>amount</b> {{amount}}</li>
+            <li class="list-group-item"><b>approvalCode</b>: {{approvalCode}}</li>
+            <li class="list-group-item"><b>currency</b>: {{currency}}</li>
+            <li class="list-group-item"><b>installmentCount</b> {{installmentCount}}</li>
+            <li class="list-group-item"><b>orderId</b> {{orderId}}</li>
+            <li class="list-group-item"><b>paymentSecurity</b> {{paymentSecurity}}</li>
+            <li class="list-group-item"><b>paymentDate</b> {{paymentDate}}</li>
+            <li class="list-group-item"><b>reconcilationDate</b> {{reconcilationDate}}</li>
+            <li class="list-group-item"><b>paymentReferenceNumber</b>
+                <p id="paymentrefno">{{paymentReferenceNumber}}</p>
+            </li>
+            <li class="list-group-item"><b>issuerBankCode</b> {{issuerBankCode}}</li>
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-4">
+                        <b>status</b> {{status}}
+                    </div>
+                    <div class="col-1 offset-md-6">
+                        <button type="button" class="btn btn-primary pull-right" onclick="togglestatusCodes();">Show
+                            Explanation
+                        </button>
+                    </div>
+                </div>
+            </li>
+            <li class="list-group-item" id="statusCodes">
+                <p>
+                    - 0: Ödeme başarılı olan işlemler için döner.
+                    - 1: İptal olmuş işlemler için döner.
+                    - 2: İade olmuş işlemler için döner.
+                    - 3: İşlem bulunamamış ise bu şekilde dönülür.
+                    - 4: Bekleyen işlemler için dönülür.
+                    - 5: Bilinmeyen bir response alındığında dönülür.
+                    - 6: hata veya timeout durumları için dönülür.
+                </p>
+            </li>
+            <li class="list-group-item"><b>statusExplanation</b> {{statusExplanation}}</li>
+            <li class="list-group-item list-group-item-primary"><b>paymentMethod</b></li>
+            <li class="list-group-item list-group-item-success" style="padding-left: 4em;"><b>paymentMethodId</b>
+                {{paymentMethod.paymentMethodId}}
+            </li>
+            <li class="list-group-item list-group-item-success" style="padding-left: 4em;"><b>paymentMethodNumber</b>
+                {{paymentMethod.paymentMethodNumber}}
+            </li>
+            <li class="list-group-item list-group-item-success" style="padding-left: 4em;"><b>paymentMethodType</b>
+                {{paymentMethod.paymentMethodType}}
+            </li>
+        </ul>
+        <br/>
+        <div class="form-group">
+            <div class="row" id="paymentrefdiv">
+                <div class="col-2">
+                    <button type="button" class="btn btn-primary" style='margin-top:2em'
+                            onclick="reversePayment();">Reverse Payment
+                    </button>
+                </div>
+                <div class="col-2">
+                    <label for="refundAmount">refundAmount</label>
+                    <input type="text" class="form-control" id="refundAmount" placeholder="1">
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-primary" style='margin-top:2em'
+                            onclick="refundPayment();">Refund Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
